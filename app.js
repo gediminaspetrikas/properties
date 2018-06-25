@@ -9,8 +9,34 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.listen(app.get('port'), () => {
+require('./routes')(app);
+
+const server = app.listen(app.get('port'), () => {
   console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
 });
+
+process.on('uncaughtException', (err) => {
+  // eslint-disable-next-line no-console
+  console.log(`UNCAUGHT EXCEPTION: ${err.name}:${err.message}stack: ${err.stack}`);
+  process.exit(30);
+});
+
+process.on('unhandledRejection', () => {
+  console.log('FATAL');
+});
+
+process.on('SIGINT', () => {
+  // eslint-disable-next-line no-console
+  console.log('EXIT WITH SIGINT');
+  process.exit(32);
+});
+
+process.on('exit', (code) => {
+  // eslint-disable-next-line no-console
+  server.close();
+  console.log('EXITING WITH code:', code);
+  process.exit(code);
+});
+
 
 module.exports = app;
