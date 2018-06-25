@@ -1,4 +1,5 @@
 const uuid = require('node-uuid');
+const _ = require('lodash');
 
 const properties = [
   {
@@ -55,4 +56,14 @@ const getAll = () => Promise.resolve(properties);
 
 const getProperty = id => Promise.resolve(properties.find(property => property.id === id));
 
-module.exports = { getAll, getProperty };
+const patchProperty = (id, data) => {
+  _
+    .chain(properties)
+    .find({ id })
+    .assignIn({ ...data })
+    .value();
+  return Promise.resolve();
+};
+
+
+module.exports = { getAll, getProperty, patchProperty };

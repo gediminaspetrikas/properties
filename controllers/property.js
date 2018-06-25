@@ -18,10 +18,19 @@ const getProperty = async (req, res, next) => {
   }
 };
 
+const patchProperty = async (req, res, next) => {
+  try {
+    const property = await propertyDatabase.patchProperty(req.params.id, req.body);
+    res
+      .status(204)
+      .json(property);
+  } catch (e) {
+    next(e);
+  }
+};
 
 const createProperty = async (req, res, next) => {};
 const deleteProperty = async (req, res, next) => {};
-const patchProperty = async (req, res, next) => {};
 
 
 module.exports = {
