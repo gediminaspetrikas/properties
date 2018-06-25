@@ -4,5 +4,11 @@ const version = 'v1';
 
 module.exports = (app) => {
   app.route(`/${version}/properties`)
-    .get(propertyController.getProperties);
+    .get(propertyController.getProperties)
+    .post(propertyController.createProperty);
+
+  app.route(`/${version}/property/:id`)
+    .get(propertyController.getProperty)
+    .patch(propertyController.patchProperty)
+    .delete(propertyController.deleteProperty);
 };

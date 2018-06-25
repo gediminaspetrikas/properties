@@ -1,5 +1,8 @@
+const uuid = require('node-uuid');
+
 const properties = [
   {
+    id: uuid.v4(),
     owner: 'carlos',
     address: {
       line1: 'Flat 5',
@@ -14,6 +17,7 @@ const properties = [
     incomeGenerated: 2000.34
   },
   {
+    id: uuid.v4(),
     owner: 'ankur',
     address: {
       line1: '4',
@@ -30,6 +34,7 @@ const properties = [
     incomeGenerated: 10000
   },
   {
+    id: uuid.v4(),
     owner: 'elaine',
     address: {
       line1: '4',
@@ -46,4 +51,8 @@ const properties = [
   }
 ];
 
-module.exports = { getAll: () => Promise.resolve(properties) };
+const getAll = () => Promise.resolve(properties);
+
+const getProperty = id => Promise.resolve(properties.find(property => property.id === id));
+
+module.exports = { getAll, getProperty };
