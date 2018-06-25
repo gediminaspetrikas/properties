@@ -38,5 +38,4 @@ process.on('exit', (code) => {
   process.exit(code);
 });
 
-
 module.exports = app;
