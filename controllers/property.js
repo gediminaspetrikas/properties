@@ -1,9 +1,10 @@
 const _ = require('lodash');
 
 const propertyDatabase = require('../databases/property');
+const propertyValidator = require('./propertyValidator');
 
 const propertyToModel = property => _({
-  owner: _.get(property, 'owner'),
+  owner: _.get(property, 'owner') ? property.owner.trim() : null,
   address: _.get(property, 'address') ? {
     line1: _.get(property, 'address.line1'),
     line2: _.get(property, 'address.line2'),
@@ -14,8 +15,8 @@ const propertyToModel = property => _({
     country: _.get(property, 'address.country'),
   } : null,
   airbnbId: _.get(property, 'airbnbId'),
-  numberOfBedrooms: _.get(property, 'numberOfBedrooms'),
-  numberOfBathrooms: _.get(property, 'numberOfBathrooms'),
+  numberOfBedrooms: _.get(property, 'numberOfBedrooms').toNumber(),
+  numberOfBathrooms: _.get(property, 'numberOfBathrooms').toNumber(),
   incomeGenerated: _.get(property, 'incomeGenerated'),
 })
   .omitBy(_.isNil)
@@ -45,6 +46,12 @@ const patchProperty = async (req, res, next) => {
   try {
     const propertyId = req.params.id;
     const propertyData = propertyToModel(req.body);
+    const errors = propertyValidator.validatePatchPropertyData(propertyData);
+    if (errors.length > 0) {
+      return res
+        .status(400)
+        .json({ errors });
+    }
     const savedProperty = await propertyDatabase.getProperty(propertyId);
     if (!savedProperty) {
       return res
