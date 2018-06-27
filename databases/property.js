@@ -106,9 +106,12 @@ const createProperty = async (data) => {
   return propertyDbToModel(savedDbProperty);
 };
 
+const deleteProperty = id => db.property.destroy({ where: { id } });
+
 module.exports = {
   getAll,
   getProperty,
   patchProperty,
   createProperty,
+  deleteProperty,
 };

@@ -12,7 +12,9 @@ const getProperties = async (req, res, next) => {
 const getProperty = async (req, res, next) => {
   try {
     const property = await propertyDatabase.getProperty(req.params.id);
-    res.json(property);
+    res
+      .status(property ? 200 : 404)
+      .json(property);
   } catch (e) {
     next(e);
   }
@@ -41,7 +43,7 @@ const createProperty = async (req, res, next) => {
 };
 const deleteProperty = async (req, res, next) => {
   try {
-    const property = await propertyDatabase.deleteProperty(req.body);
+    const property = await propertyDatabase.deleteProperty(req.params.id);
     res
       .status(204)
       .json(property);

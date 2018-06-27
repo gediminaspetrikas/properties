@@ -15,7 +15,7 @@ const db = require('./databases');
 
 db
   .sequelize
-  .sync({ force: true })
+  .sync({ force: false })
   .then(() => {
     const server = app.listen(app.get('port'), () => {
       console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
