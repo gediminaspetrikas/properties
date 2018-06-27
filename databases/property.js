@@ -1,5 +1,6 @@
 const uuid = require('node-uuid');
 const _ = require('lodash');
+const db = require('../databases');
 
 const properties = [
   {
@@ -65,5 +66,49 @@ const patchProperty = (id, data) => {
   return Promise.resolve();
 };
 
+const propertyModelToDb = property => ({
+  id: property.id || uuid.v4(),
+  owner: property.owner,
+  airbnbId: property.airbnbId,
+  numberOfBedrooms: property.numberOfBedrooms,
+  numberOfBathrooms: property.numberOfBathrooms,
+  incomeGenerated: property.incomeGenerated,
+  line1: property.address.line1,
+  line2: property.address.line2,
+  line3: property.address.line3,
+  line4: property.address.line4,
+  postCode: property.address.postCode,
+  city: property.address.city,
+  country: property.address.country,
+});
 
-module.exports = { getAll, getProperty, patchProperty };
+const propertyDbToModel = dbProperty => ({
+  id: dbProperty.id,
+  owner: dbProperty.owner,
+  address: {
+    line1: dbProperty.line1,
+    line2: dbProperty.line2,
+    line3: dbProperty.line3,
+    line4: dbProperty.line4,
+    postCode: dbProperty.postCode,
+    city: dbProperty.city,
+    country: dbProperty.country,
+  },
+  airbnbId: dbProperty.airbnbId,
+  numberOfBedrooms: dbProperty.numberOfBedrooms,
+  numberOfBathrooms: dbProperty.numberOfBathrooms,
+  incomeGenerated: dbProperty.incomeGenerated,
+});
+
+const createProperty = async (data) => {
+  const dbPropertyData = propertyModelToDb(data);
+  const savedDbProperty = await db.property.create(dbPropertyData);
+  return propertyDbToModel(savedDbProperty);
+};
+
+module.exports = {
+  getAll,
+  getProperty,
+  patchProperty,
+  createProperty,
+};

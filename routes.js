@@ -7,7 +7,7 @@ module.exports = (app) => {
     .get(propertyController.getProperties)
     .post(propertyController.createProperty);
 
-  app.route(`/${version}/property/:id`)
+  app.route(`/${version}/properties/:id`)
     .get(propertyController.getProperty)
     .patch(propertyController.patchProperty)
     .delete(propertyController.deleteProperty);

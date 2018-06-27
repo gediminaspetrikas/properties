@@ -11,9 +11,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 require('./routes')(app);
 
-const server = app.listen(app.get('port'), () => {
-  console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
-});
+const db = require('./databases');
+
+db
+  .sequelize
+  .sync({ force: true })
+  .then(() => {
+    const server = app.listen(app.get('port'), () => {
+      console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
+    });
+
+    process.on('exit', (code) => {
+      // eslint-disable-next-line no-console
+      server.close();
+      console.log('EXITING WITH code:', code);
+      process.exit(code);
+    });
+  })
+  .catch((err) => {
+    console.error('Unable to connect to the database: ', err);
+  });
+
 
 process.on('uncaughtException', (err) => {
   // eslint-disable-next-line no-console
@@ -31,11 +49,5 @@ process.on('SIGINT', () => {
   process.exit(32);
 });
 
-process.on('exit', (code) => {
-  // eslint-disable-next-line no-console
-  server.close();
-  console.log('EXITING WITH code:', code);
-  process.exit(code);
-});
 
 module.exports = app;

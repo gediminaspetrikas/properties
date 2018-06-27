@@ -39,7 +39,7 @@ describe('/v1', () => {
     });
   });
 
-  describe('/property/:id', () => {
+  describe('/properties/:id', () => {
     context('GET', () => {
       it('should return a single property details', async () => {
         const allPropertiesBody = await agent
@@ -49,7 +49,7 @@ describe('/v1', () => {
 
         const property = _.head(allPropertiesBody.properties);
         const propertyBody = await agent
-          .get(`/v1/property/${property.id}`)
+          .get(`/v1/properties/${property.id}`)
           .expect(200)
           .then(response => response.body);
 
@@ -67,16 +67,43 @@ describe('/v1', () => {
         const uniqueness = uuid.v4();
         const patchData = { owner: `Integration Test ${uniqueness}` };
         await agent
-          .patch(`/v1/property/${property.id}`)
+          .patch(`/v1/properties/${property.id}`)
           .send(patchData)
           .expect(204);
 
         const propertyBody = await agent
-          .get(`/v1/property/${property.id}`)
+          .get(`/v1/properties/${property.id}`)
           .expect(200)
           .then(response => response.body);
 
         expect(propertyBody.owner, 'to be', patchData.owner);
+      });
+    });
+    context('POST', () => {
+      it('should create a property', async () => {
+        const propertyData = {
+          owner: 'carlos',
+          address: {
+            line1: 'Flat 5',
+            line4: '7 Westbourne Terrace',
+            postCode: 'W2 3UL',
+            city: 'London',
+            country: 'U.K.'
+          },
+          airbnbId: 3512500,
+          numberOfBedrooms: 1,
+          numberOfBathrooms: 1,
+          incomeGenerated: 2000.34
+        };
+
+        const propertyCreateData = await agent
+          .post('/v1/properties')
+          .send(propertyData)
+          .expect(200)
+          .then(response => response.body);
+
+        expect(propertyCreateData, 'to have key', 'id');
+        expect(_.omit(propertyCreateData, 'id'), 'to equal', propertyData);
       });
     });
   });
