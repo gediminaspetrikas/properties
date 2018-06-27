@@ -52,17 +52,17 @@ describe('/v1', () => {
         checkRequiredPropertyKeys(property);
       });
     });
-  });
-  context('POST', () => {
-    it('should create a property', async () => {
-      const propertyCreateData = await agent
-        .post('/v1/properties')
-        .send(propertyData)
-        .expect(200)
-        .then(response => response.body);
+    context('POST', () => {
+      it('should create a property', async () => {
+        const propertyCreateData = await agent
+          .post('/v1/properties')
+          .send(propertyData)
+          .expect(200)
+          .then(response => response.body);
 
-      expect(propertyCreateData, 'to have key', 'id');
-      expect(_.omit(propertyCreateData, 'id'), 'to equal', propertyData);
+        expect(propertyCreateData, 'to have key', 'id');
+        expect(_.omit(propertyCreateData, 'id'), 'to equal', propertyData);
+      });
     });
   });
   describe('/properties/:id', () => {

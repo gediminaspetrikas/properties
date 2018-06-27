@@ -1,4 +1,25 @@
+const _ = require('lodash');
+
 const propertyDatabase = require('../databases/property');
+
+const propertyToModel = property => _({
+  owner: _.get(property, 'owner'),
+  address: _.get(property, 'address') ? {
+    line1: _.get(property, 'address.line1'),
+    line2: _.get(property, 'address.line2'),
+    line3: _.get(property, 'address.line3'),
+    line4: _.get(property, 'address.line4'),
+    postCode: _.get(property, 'address.postCode'),
+    city: _.get(property, 'address.city'),
+    country: _.get(property, 'address.country'),
+  } : null,
+  airbnbId: _.get(property, 'airbnbId'),
+  numberOfBedrooms: _.get(property, 'numberOfBedrooms'),
+  numberOfBathrooms: _.get(property, 'numberOfBathrooms'),
+  incomeGenerated: _.get(property, 'incomeGenerated'),
+})
+  .omitBy(_.isNil)
+  .value();
 
 const getProperties = async (req, res, next) => {
   try {
@@ -11,10 +32,10 @@ const getProperties = async (req, res, next) => {
 
 const getProperty = async (req, res, next) => {
   try {
-    const property = await propertyDatabase.getProperty(req.params.id);
+    const propertyResponse = await propertyDatabase.getProperty(req.params.id);
     res
-      .status(property ? 200 : 404)
-      .json(property);
+      .status(propertyResponse ? 200 : 404)
+      .json(propertyResponse);
   } catch (e) {
     next(e);
   }
@@ -22,10 +43,18 @@ const getProperty = async (req, res, next) => {
 
 const patchProperty = async (req, res, next) => {
   try {
-    const property = await propertyDatabase.patchProperty(req.params.id, req.body);
-    res
+    const propertyId = req.params.id;
+    const propertyData = propertyToModel(req.body);
+    const savedProperty = await propertyDatabase.getProperty(propertyId);
+    if (!savedProperty) {
+      return res
+        .sendStatus(404);
+    }
+    const newProperty = { ...savedProperty, ...propertyData };
+    const propertyResponse = await propertyDatabase.patchProperty(req.params.id, newProperty);
+    return res
       .status(204)
-      .json(property);
+      .json(propertyResponse);
   } catch (e) {
     next(e);
   }
@@ -33,14 +62,16 @@ const patchProperty = async (req, res, next) => {
 
 const createProperty = async (req, res, next) => {
   try {
-    const property = await propertyDatabase.createProperty(req.body);
+    const property = propertyToModel(req.body);
+    const propertyResponse = await propertyDatabase.createProperty(property);
     res
       .status(200)
-      .json(property);
+      .json(propertyResponse);
   } catch (e) {
     next(e);
   }
 };
+
 const deleteProperty = async (req, res, next) => {
   try {
     const property = await propertyDatabase.deleteProperty(req.params.id);
