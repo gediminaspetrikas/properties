@@ -1,7 +1,6 @@
 const _ = require('lodash');
-
+const { validationResult } = require('express-validator/check');
 const propertyDatabase = require('../databases/property');
-const propertyValidator = require('./propertyValidator');
 
 const propertyToModel = property => _({
   owner: _.get(property, 'owner') ? property.owner.trim() : null,
@@ -15,8 +14,8 @@ const propertyToModel = property => _({
     country: _.get(property, 'address.country'),
   } : null,
   airbnbId: _.get(property, 'airbnbId'),
-  numberOfBedrooms: _.get(property, 'numberOfBedrooms').toNumber(),
-  numberOfBathrooms: _.get(property, 'numberOfBathrooms').toNumber(),
+  numberOfBedrooms: _.get(property, 'numberOfBedrooms'),
+  numberOfBathrooms: _.get(property, 'numberOfBathrooms'),
   incomeGenerated: _.get(property, 'incomeGenerated'),
 })
   .omitBy(_.isNil)
@@ -32,6 +31,11 @@ const getProperties = async (req, res, next) => {
 };
 
 const getProperty = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400)
+      .json({ errors: errors.array() });
+  }
   try {
     const propertyResponse = await propertyDatabase.getProperty(req.params.id);
     res
@@ -43,15 +47,15 @@ const getProperty = async (req, res, next) => {
 };
 
 const patchProperty = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400)
+      .json({ errors: errors.array() });
+  }
+
+  const propertyId = req.params.id;
+  const propertyData = propertyToModel(req.body);
   try {
-    const propertyId = req.params.id;
-    const propertyData = propertyToModel(req.body);
-    const errors = propertyValidator.validatePatchPropertyData(propertyData);
-    if (errors.length > 0) {
-      return res
-        .status(400)
-        .json({ errors });
-    }
     const savedProperty = await propertyDatabase.getProperty(propertyId);
     if (!savedProperty) {
       return res
@@ -68,9 +72,14 @@ const patchProperty = async (req, res, next) => {
 };
 
 const createProperty = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400)
+      .json({ errors: errors.array() });
+  }
+  const propertyData = propertyToModel(req.body);
   try {
-    const property = propertyToModel(req.body);
-    const propertyResponse = await propertyDatabase.createProperty(property);
+    const propertyResponse = await propertyDatabase.createProperty(propertyData);
     res
       .status(200)
       .json(propertyResponse);
@@ -80,6 +89,11 @@ const createProperty = async (req, res, next) => {
 };
 
 const deleteProperty = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400)
+      .json({ errors: errors.array() });
+  }
   try {
     const property = await propertyDatabase.deleteProperty(req.params.id);
     res

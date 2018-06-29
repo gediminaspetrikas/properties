@@ -68,14 +68,14 @@ describe('/v1', () => {
   describe('/properties/:id', () => {
     context('GET', () => {
       it('should return a single property details', async () => {
-        const allPropertiesBody = await agent
-          .get('/v1/properties')
+        const createdProperty = await agent
+          .post('/v1/properties')
+          .send(propertyData)
           .expect(200)
           .then(response => response.body);
 
-        const property = _.head(allPropertiesBody.properties);
         const propertyBody = await agent
-          .get(`/v1/properties/${property.id}`)
+          .get(`/v1/properties/${createdProperty.id}`)
           .expect(200)
           .then(response => response.body);
         checkRequiredPropertyKeys(propertyBody);
@@ -83,21 +83,21 @@ describe('/v1', () => {
     });
     context('PATCH', () => {
       it('should patch a property', async () => {
-        const allPropertiesBody = await agent
-          .get('/v1/properties')
+        const createdProperty = await agent
+          .post('/v1/properties')
+          .send(propertyData)
           .expect(200)
           .then(response => response.body);
 
-        const property = _.head(allPropertiesBody.properties);
         const uniqueness = uuid.v4();
         const patchData = { owner: `Integration Test ${uniqueness}` };
         await agent
-          .patch(`/v1/properties/${property.id}`)
+          .patch(`/v1/properties/${createdProperty.id}`)
           .send(patchData)
           .expect(204);
 
         const propertyBody = await agent
-          .get(`/v1/properties/${property.id}`)
+          .get(`/v1/properties/${createdProperty.id}`)
           .expect(200)
           .then(response => response.body);
 
