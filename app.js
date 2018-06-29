@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
+const errorHandler = require('errorhandler');
 
 const app = express();
 
@@ -8,6 +9,10 @@ app.set('port', process.env.PORT || 3000);
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(errorHandler());
+}
 
 require('./routes')(app);
 
