@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const { validationResult } = require('express-validator/check');
+
 const propertyDatabase = require('../databases/property');
+const airbnbGateway = require('../gateways/airbnb');
 
 const propertyToModel = property => _({
   owner: _.get(property, 'owner') ? property.owner.trim() : null,
@@ -79,6 +81,7 @@ const createProperty = async (req, res, next) => {
   }
   const propertyData = propertyToModel(req.body);
   try {
+    await airbnbGateway.validateAirbnbId(propertyData.airbnbId);
     const propertyResponse = await propertyDatabase.createProperty(propertyData);
     res
       .status(200)

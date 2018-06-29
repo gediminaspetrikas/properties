@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
-const errorHandler = require('errorhandler');
 
 const app = express();
 
@@ -10,13 +9,29 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(errorHandler());
-}
-
 require('./routes')(app);
 
 const db = require('./databases');
+
+if (process.env.NODE_ENV === 'development') {
+  // eslint-disable-next-line no-unused-vars
+  app.use((err, req, res, next) => {
+    if (err.status) {
+      return res.status(err.status)
+        .json({
+          message: err.message,
+          error: err.error,
+        });
+    }
+
+    // Unknown error which details we do not want to expose
+    return res.status(500)
+      .json({
+        message: 'Contact your local administrator',
+        error: 'InternalServerError',
+      });
+  });
+}
 
 db
   .sequelize
