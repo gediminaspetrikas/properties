@@ -8,7 +8,7 @@ const tokensPerInterval = 1;
 const intervalMs = 250;
 const limiter = new RateLimiter(tokensPerInterval, intervalMs);
 
-const buildPropertyUrl = propertyAirbnbId => `https://www.airbnb.co.uk/rooms/${propertyAirbnbId}`;
+const buildPropertyUrl = propertyAirbnbId => `https://www.airbnb.co.uk/rooms/${encodeURIComponent(propertyAirbnbId)}`;
 
 const validateAirbnbId = async id => new Promise((resolve, reject) => limiter.removeTokens(1,
   async (error) => {
