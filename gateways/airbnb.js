@@ -10,8 +10,8 @@ const limiter = new RateLimiter(tokensPerInterval, intervalMs);
 
 const buildPropertyUrl = propertyAirbnbId => `https://www.airbnb.co.uk/rooms/${encodeURIComponent(propertyAirbnbId)}`;
 
-const validateAirbnbId = async id => new Promise((resolve, reject) => limiter.removeTokens(1,
-  async (error) => {
+const validateAirbnbId = async id => new Promise((resolve, reject) => {
+  const limiterCallback = async (error) => {
     if (error) {
       return reject(new Error('Validating Airbnb ID is not available at this time, please try again'));
     }
@@ -20,13 +20,15 @@ const validateAirbnbId = async id => new Promise((resolve, reject) => limiter.re
     } catch (error) {
       reject(error);
     }
-    return resolve(true);
-  }))
+    return resolve();
+  };
+
+  return limiter.removeTokens(1, limiterCallback);
+})
   .catch((error) => {
     if (_.get(error, 'response.status') !== 200) {
       throw new errors.AirbnbValidationFailed();
     }
-    console.log('air bnb error');
     throw error;
   });
 

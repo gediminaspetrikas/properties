@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { validationResult } = require('express-validator/check');
 
 const propertyDatabase = require('../databases/property');
-const airbnbGateway = require('../gateways/airbnb');
+const propertyManager = require('../managers/property');
 
 const propertyToModel = property => _({
   owner: _.get(property, 'owner') ? property.owner.trim() : null,
@@ -58,16 +58,9 @@ const patchProperty = async (req, res, next) => {
   const propertyId = req.params.id;
   const propertyData = propertyToModel(req.body);
   try {
-    const savedProperty = await propertyDatabase.getProperty(propertyId);
-    if (!savedProperty) {
-      return res
-        .sendStatus(404);
-    }
-    const newProperty = { ...savedProperty, ...propertyData };
-    const propertyResponse = await propertyDatabase.patchProperty(req.params.id, newProperty);
+    const propertyResponse = await propertyManager.patchProperty(propertyId, propertyData);
     return res
-      .status(204)
-      .json(propertyResponse);
+      .sendStatus(propertyResponse ? 204 : 404);
   } catch (e) {
     next(e);
   }
@@ -81,8 +74,7 @@ const createProperty = async (req, res, next) => {
   }
   const propertyData = propertyToModel(req.body);
   try {
-    await airbnbGateway.validateAirbnbId(propertyData.airbnbId);
-    const propertyResponse = await propertyDatabase.createProperty(propertyData);
+    const propertyResponse = await propertyManager.createProperty(propertyData);
     res
       .status(200)
       .json(propertyResponse);
