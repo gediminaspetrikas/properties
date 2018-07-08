@@ -3,7 +3,7 @@ const airbnbGateway = require('../gateways/airbnb');
 
 const createProperty = async (propertyData) => {
   await airbnbGateway.validateAirbnbId(propertyData.airbnbId);
-  await propertyDatabase.createProperty(propertyData);
+  return propertyDatabase.createProperty(propertyData);
 };
 
 const patchProperty = async (propertyId, propertyData) => {

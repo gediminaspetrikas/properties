@@ -92,7 +92,7 @@ const createProperty = async (req, res, next) => {
   try {
     const propertyResponse = await propertyManager.createProperty(propertyData);
     res
-      .status(204)
+      .status(200)
       .json(propertyResponse);
   } catch (e) {
     next(e);

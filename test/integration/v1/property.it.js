@@ -29,7 +29,8 @@ const checkRequiredPropertyKeys = (property) => {
     'airbnbId',
     'numberOfBedrooms',
     'numberOfBathrooms',
-    'incomeGenerated']);
+    'incomeGenerated',
+    'updatedAt']);
   expect(property.address, 'to have keys', ['line1',
     'line4',
     'postCode',
@@ -61,7 +62,7 @@ describe('/v1', () => {
           .then(response => response.body);
 
         expect(propertyCreateData, 'to have key', 'id');
-        expect(_.omit(propertyCreateData, 'id'), 'to equal', propertyData);
+        expect(_.omit(propertyCreateData, ['updatedAt', 'id']), 'to equal', propertyData);
       });
     });
   });
@@ -78,7 +79,7 @@ describe('/v1', () => {
           .get(`/v1/properties/${createdProperty.id}`)
           .expect(200)
           .then(response => response.body);
-        checkRequiredPropertyKeys(propertyBody);
+        checkRequiredPropertyKeys(propertyBody.property);
       });
     });
     context('PATCH', () => {
@@ -101,7 +102,7 @@ describe('/v1', () => {
           .expect(200)
           .then(response => response.body);
 
-        expect(propertyBody.owner, 'to be', patchData.owner);
+        expect(propertyBody.property.owner, 'to be', patchData.owner);
       });
     });
     context('DELETE', () => {
