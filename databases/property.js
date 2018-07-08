@@ -37,6 +37,26 @@ const propertyDbToModel = dbProperty => ({
   numberOfBedrooms: dbProperty.numberOfBedrooms,
   numberOfBathrooms: dbProperty.numberOfBathrooms,
   incomeGenerated: dbProperty.incomeGenerated,
+  updatedAt: dbProperty.updated_at,
+});
+
+const propertyRawDbToModel = dbProperty => ({
+  id: dbProperty.id,
+  owner: dbProperty.owner,
+  address: {
+    line1: dbProperty.line1,
+    line2: dbProperty.line2,
+    line3: dbProperty.line3,
+    line4: dbProperty.line4,
+    postCode: dbProperty.post_code,
+    city: dbProperty.city,
+    country: dbProperty.country,
+  },
+  airbnbId: dbProperty.airbnb_id,
+  numberOfBedrooms: dbProperty.number_of_bedrooms,
+  numberOfBathrooms: dbProperty.number_of_bathrooms,
+  incomeGenerated: dbProperty.income_generated,
+  updatedAt: dbProperty.updated_at,
 });
 
 const getAll = async () => {
@@ -52,7 +72,30 @@ const getProperty = async (id) => {
   return propertyDbToModel(dbProperty);
 };
 
-const patchProperty = (id, data) => db.property.update(data, { where: { id } });
+const getPropertyHistory = async (id) => {
+  const getPropertyHistoryUpdates = () => db.sequelize
+    .query('SELECT * FROM property_history WHERE id = ? AND action = ?',
+      { replacements: [id, 'update'], type: db.sequelize.QueryTypes.SELECT });
+
+  const getPropertyHistoryInserts = () => db.sequelize
+    .query('SELECT * FROM property_history WHERE id = ? AND action = ?',
+      { replacements: [id, 'insert'], type: db.sequelize.QueryTypes.SELECT });
+
+  const [dbPropertyHistoryInserts, dbPropertyHistoryUpdates] = await Promise.all([
+    getPropertyHistoryInserts(), getPropertyHistoryUpdates()
+  ]);
+
+  const propertyData = [
+    ...dbPropertyHistoryUpdates.map(propertyRawDbToModel),
+    ...dbPropertyHistoryInserts.map(propertyRawDbToModel)
+  ];
+  return _.sortBy(propertyData, ['updatedAt']);
+};
+
+const patchProperty = (id, data) => {
+  const dbPropertyData = propertyModelToDb(data);
+  return db.property.update(dbPropertyData, { where: { id } });
+};
 
 const createProperty = async (data) => {
   const dbPropertyData = propertyModelToDb(data);
@@ -65,6 +108,7 @@ const deleteProperty = id => db.property.destroy({ where: { id } });
 module.exports = {
   getAll,
   getProperty,
+  getPropertyHistory,
   patchProperty,
   createProperty,
   deleteProperty,

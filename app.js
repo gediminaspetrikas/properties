@@ -1,10 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
+const path = require('path');
 
 const app = express();
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3001);
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,12 +20,15 @@ if (process.env.NODE_ENV === 'development') {
     if (err.status) {
       return res.status(err.status)
         .json({
-          message: err.message,
-          error: err.error,
+          errors: [
+            {
+              message: err.message,
+              error: err.error,
+            }
+          ]
         });
     }
 
-    // Unknown error which details we do not want to expose
     return res.status(500)
       .json({
         message: 'Contact your local administrator',
@@ -32,6 +36,14 @@ if (process.env.NODE_ENV === 'development') {
       });
   });
 }
+
+// Serve any static files
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
 
 db
   .sequelize

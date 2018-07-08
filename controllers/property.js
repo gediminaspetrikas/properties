@@ -42,7 +42,23 @@ const getProperty = async (req, res, next) => {
     const propertyResponse = await propertyDatabase.getProperty(req.params.id);
     res
       .status(propertyResponse ? 200 : 404)
-      .json(propertyResponse);
+      .json({ property: propertyResponse });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const getPropertyHistory = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400)
+      .json({ errors: errors.array() });
+  }
+  try {
+    const propertyResponse = await propertyDatabase.getPropertyHistory(req.params.id);
+    res
+      .status(propertyResponse ? 200 : 404)
+      .json({ propertyHistory: propertyResponse });
   } catch (e) {
     next(e);
   }
@@ -76,7 +92,7 @@ const createProperty = async (req, res, next) => {
   try {
     const propertyResponse = await propertyManager.createProperty(propertyData);
     res
-      .status(200)
+      .status(204)
       .json(propertyResponse);
   } catch (e) {
     next(e);
@@ -106,4 +122,5 @@ module.exports = {
   createProperty,
   deleteProperty,
   patchProperty,
+  getPropertyHistory,
 };

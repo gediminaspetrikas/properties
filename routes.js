@@ -11,4 +11,5 @@ module.exports = (app) => {
   app.patch(`/${version}/properties/:id`, [validators.patchPropertyValidators], propertyController.patchProperty);
   app.get(`/${version}/properties/:id`, [validators.pathIdValidator], propertyController.getProperty);
   app.delete(`/${version}/properties/:id`, [validators.pathIdValidator], propertyController.deleteProperty);
+  app.get(`/${version}/properties/:id/history`, [validators.pathIdValidator], propertyController.getPropertyHistory);
 };
